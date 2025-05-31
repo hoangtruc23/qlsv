@@ -1,0 +1,21 @@
+@import "tailwindcss";
+/* @import "bootstrap" */
+
+
+.title-page {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.item-sidebar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 0 20px;
+    height: 50px;
+}
+
+.item-sidebar:hover {
+    background-color: #50A2FF;
+}
