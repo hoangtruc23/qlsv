@@ -10,10 +10,7 @@ function Sidebar() {
                 <i className="fa-solid fa-book"></i>
                 <Link to='/admin/manage-subject'>Quản lý môn học</Link>
             </div>
-            <div className="item-sidebar">
-                <i className="fa-solid fa-book"></i>
-                <p>Phân công giáo viên</p>
-            </div>
+           
             <div className="item-sidebar">
                 <i className="fa-solid fa-book"></i>
                 <Link to='/admin/manage-student'>Quản lý sinh viên</Link>
