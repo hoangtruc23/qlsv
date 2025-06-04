@@ -1,7 +1,7 @@
 import rootApi from './baseServices';
 
 async function getListStudent() {
-    const response = await fetch(`${rootApi}/api/students`, {
+    const response = await fetch(`${rootApi}/students`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
     });
@@ -13,7 +13,7 @@ async function getListStudent() {
 
 
 async function getListTeacher() {
-    const response = await fetch(`${rootApi}/api/teachers`, {
+    const response = await fetch(`${rootApi}/teachers`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
     });

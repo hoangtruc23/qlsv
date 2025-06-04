@@ -1,7 +1,8 @@
-import { Input, Table, Button, Modal, Form, Select, notification } from 'antd';
+import { Input, Table, Button, Modal, Form, Select } from 'antd';
 import { useEffect, useState } from 'react';
 import { getListSubject, addSubject, assignTeacher } from '../../services/subjectServices';
 import { getListTeacher } from '../../services/userServices';
+import { toast } from 'react-toastify';
 
 const { Search } = Input;
 
@@ -21,7 +22,6 @@ type User = {
 
 
 function ManageSubject() {
-    const [api, contextHolder] = notification.useNotification();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isModalAssign, setIsModalAssign] = useState(false);
     const [listSubject, setListSubject] = useState<Subject[]>([]);
@@ -67,7 +67,7 @@ function ManageSubject() {
             key: 'stt',
         },
         {
-            title: 'Name',
+            title: 'Môn học',
             dataIndex: 'name',
             key: 'name',
         },
@@ -76,20 +76,20 @@ function ManageSubject() {
             dataIndex: 'credit',
             key: 'credit',
         },
-        {
-            title: 'Giáo viên',
-            dataIndex: 'teacher_name',
-            key: 'teacher_name',
-        },
-        {
-            title: 'Thao tác',
-            key: 'action',
-            render: (_: unknown, record: any) => (
-                <Button type="link" onClick={() => handleAssignTeacher(record)}>
-                    <i className="fa-solid fa-plus"></i>
-                </Button>
-            ),
-        }
+        // {
+        //     title: 'Giáo viên',
+        //     dataIndex: 'teacher_name',
+        //     key: 'teacher_name',
+        // },
+        // {
+        //     title: 'Thao tác',
+        //     key: 'action',
+        //     render: (_: unknown, record: object) => (
+        //         <Button type="link" onClick={() => handleAssignTeacher(record)}>
+        //             <i className="fa-solid fa-plus"></i>
+        //         </Button>
+        //     ),
+        // }
     ];
 
     const handleSubmitAdd = async (values: Subject) => {
@@ -101,43 +101,27 @@ function ManageSubject() {
         }
     }
 
-    const handleAssignTeacher = (item) => {
-        setIsModalAssign(true);
-        setSubjectID(item.subject_id)
-    }
-
-    const openNotification = (description: string) => {
-        api.info({
-            message: `Notification`,
-            description: `${description}`,
-        });
-    };
-
-
     const handleSelectedTeacher = async (teacher_id: number) => {
         const res = await assignTeacher(teacher_id, subjectID);
         if (res.success) {
             setIsModalAssign(false);
             loadGetListSubject();
-            openNotification(res.message);
+            toast.success(res.message);
         }
-
     };
-
 
     return (
         <div className="p-10">
             <h1 className="title-page">Quản lý môn học</h1>
-            {contextHolder}
             <div className="w-52 text-center bg-red-400 p-3 rounded-2xl text-white">
                 <p>Tổng số môn học</p>
                 <p>{listSubject.length}</p>
             </div>
             <div className="flex gap-2 w-1/3 ml-auto">
                 <Search
-                    placeholder="input search text"
+                    placeholder="Nhập tên môn học"
                     allowClear
-                    enterButton="Search"
+                    enterButton="Tìm kiếm"
 
                 // onSearch={onSearch}
                 />
@@ -145,7 +129,7 @@ function ManageSubject() {
             </div>
 
 
-            <Table dataSource={dataSource} columns={columns} />
+            <Table dataSource={dataSource} columns={columns} className="my-7" />
 
             <Modal
                 title="Thêm môn học"

@@ -9,22 +9,42 @@ type FieldType = {
 
 import { loginAPI } from '../../services/authServices';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { setUser } from '../../features/authentication/authSlice';
+import { toast } from 'react-toastify';
+
 function Login() {
+    const dispatch = useDispatch();
+
     const navigate = useNavigate();
     const handleLogin = async (values: FieldType) => {
         if (!values.username || !values.password) {
             console.error('Username and password are required');
             return;
         }
-
         try {
             const res = await loginAPI(values.username, values.password);
             if (res.success) {
+                toast.success(res.message);
                 navigate('/')
+                const data = res.data;
+                // Khi đăng nhập thành công
+                localStorage.setItem('user', JSON.stringify(data));
+
+                dispatch(setUser({
+                    id: data.id,
+                    full_name: data.full_name,
+                    card_id: data.card_id,
+                    role: data.role
+                }));
+
+            } else {
+                toast.error(res.message);
             }
 
         } catch (error) {
             console.log(error)
+
         }
     };
 
@@ -68,6 +88,7 @@ function Login() {
                     </Button>
                 </Form.Item>
             </Form>
+
         </div>
     )
 }
