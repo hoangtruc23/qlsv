@@ -47,6 +47,7 @@ function ManageClasses() {
     const [semester, setSemester] = useState('');
     const [maxStudent, setMaxStudent] = useState('');
     const [currentClass, setCurrentClass] = useState(0);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const columns = [
         {
@@ -82,7 +83,7 @@ function ManageClasses() {
         {
             title: 'Thao tác',
             key: 'action',
-            render: (_: unknown, record: object) => (
+            render: (_: unknown, record: Class) => (
                 <Button type="link" onClick={() => handleAssignStudent(record)}>
                     <i className="fa-solid fa-plus"></i>
                 </Button>
@@ -91,18 +92,39 @@ function ManageClasses() {
 
     ];
 
-    const dataSource = listClass.map((item, key) => ({
-        stt: key + 1,
-        class_id: item.class_id,
-        class_name: item.class_name,
-        subject_id: item.subject_id,
-        subject_name: item.subject_name,
-        teacher_name: item.teacher_name,
-        teacher_id: item.teacher_id,
-        max_students: item.max_students,
-        current_students: item.current_students,
-        status: item.status
-    }));
+    // const dataSource = listClass.map((item, key) => ({
+    //     stt: key + 1,
+    //     class_id: item.class_id,
+    //     class_name: item.class_name,
+    //     subject_id: item.subject_id,
+    //     subject_name: item.subject_name,
+    //     teacher_name: item.teacher_name,
+    //     teacher_id: item.teacher_id,
+    //     max_students: item.max_students,
+    //     current_students: item.current_students,
+    //     status: item.status
+    // }));
+
+    const dataSource = listClass
+        .filter(item =>
+            item.class_name?.toLowerCase().includes(searchTerm.toLowerCase()) || ""
+        ).map((item, index) => ({
+            stt: index + 1,
+            class_id: item.class_id,
+            class_name: item.class_name,
+            subject_id: item.subject_id,
+            subject_name: item.subject_name,
+            teacher_name: item.teacher_name,
+            teacher_id: item.teacher_id,
+            max_students: item.max_students,
+            current_students: item.current_students,
+            status: item.status,
+            semester: item.semester,
+        }));
+
+    const handleSearch = (value: string) => {
+        setSearchTerm(value.trim().toLowerCase());
+    };
 
     const handleAssignClass = async () => {
         const res = await postNewClasses(selectedSubject, selectedTeacher, semester, maxStudent);
@@ -159,8 +181,7 @@ function ManageClasses() {
 
 
 
-
-    const handleAssignStudent = (item) => {
+    const handleAssignStudent = (item: Class) => {
         setIsModalAssign(true)
         setCurrentClass(item.class_id)
     }
@@ -199,7 +220,7 @@ function ManageClasses() {
                     placeholder="Nhập tên môn học"
                     allowClear
                     enterButton="Tìm kiếm"
-                // onSearch={onSearch}
+                    onSearch={handleSearch}
                 />
                 <Button type="primary" onClick={() => setIsModalOpen(true)}>Thêm lớp học</Button>
             </div>
@@ -216,9 +237,8 @@ function ManageClasses() {
                 onOk={() => handleAssignClass()}
             // footer={null}
             >
-                <div className="flex gap-4">
-                    {/* Chọn môn học */}
-                    <div className="flex flex-col gap-2 flex-1">
+                <div className="flex flex-wrap gap-4">
+                    <div className="flex-1 min-w-[200px]">
                         <p>Chọn môn học</p>
                         <Select
                             placeholder="Chọn môn học"
@@ -234,8 +254,7 @@ function ManageClasses() {
                         </Select>
                     </div>
 
-                    {/* Chọn giáo viên */}
-                    <div className="flex flex-col gap-2 flex-1">
+                    <div className="flex-1 min-w-[200px]">
                         <p>Chọn giáo viên</p>
                         <Select
                             placeholder="Chọn giáo viên"
@@ -252,11 +271,11 @@ function ManageClasses() {
                     </div>
 
                     {/* Nhập học kỳ */}
-                    <div className="flex flex-col gap-2 flex-1">
+                    <div className="flex-1 min-w-[200px]">
                         <p>Học kỳ</p>
                         <input
                             type="number"
-                            className="border rounded px-2 py-1"
+                            className="border rounded px-2 py-1 w-full border-[#d9d9d9]"
                             placeholder="Nhập học kỳ"
                             value={semester}
                             onChange={(e) => setSemester(e.target.value)}
@@ -265,11 +284,11 @@ function ManageClasses() {
 
 
                     {/* Nhập max */}
-                    <div className="flex flex-col gap-2 flex-1">
+                    <div className="flex-1 min-w-[200px]">
                         <p>Tối đa sinh viên</p>
                         <input
                             type="number"
-                            className="border rounded px-2 py-1"
+                            className="border rounded px-2 py-1 w-full border-[#d9d9d9]"
                             value={maxStudent}
                             onChange={(e) => setMaxStudent(e.target.value)}
                         />

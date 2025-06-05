@@ -7,7 +7,7 @@ type User = {
     id: number;
     full_name: string;
     card_id: string;
-    username:string;
+    username: string;
 }
 function ManageStudent() {
     const [listData, setListData] = useState<User[]>([]);
@@ -56,15 +56,15 @@ function ManageStudent() {
 
     const filteredData = listData
         .filter(student =>
-            student.full_name.toLowerCase().includes(searchTerm) ||
-            student.card_id.includes(searchTerm)
+            (student.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) || "") ||
+            (student.card_id?.includes(searchTerm) || "")
         )
         .map((item, index) => ({
             key: item.id,
             id: index + 1,
             name: item.full_name,
             card_id: item.card_id,
-            username:item.username
+            username: item.username
         }));
 
     return (

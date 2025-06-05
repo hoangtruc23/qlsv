@@ -1,5 +1,9 @@
-// import type { FormProps } from 'antd';
 import { Button, Form, Input } from 'antd';
+import { loginAPI } from '../../services/authServices';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { setUser } from '../../features/authentication/authSlice';
+import { toast } from 'react-toastify';
 
 type FieldType = {
     username?: string;
@@ -7,90 +11,79 @@ type FieldType = {
     remember?: string;
 };
 
-import { loginAPI } from '../../services/authServices';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { setUser } from '../../features/authentication/authSlice';
-import { toast } from 'react-toastify';
-
 function Login() {
     const dispatch = useDispatch();
-
     const navigate = useNavigate();
+
     const handleLogin = async (values: FieldType) => {
         if (!values.username || !values.password) {
-            console.error('Username and password are required');
+            toast.error('Vui lòng nhập đầy đủ tài khoản và mật khẩu!');
             return;
         }
         try {
             const res = await loginAPI(values.username, values.password);
             if (res.success) {
                 toast.success(res.message);
-                navigate('/')
                 const data = res.data;
-                // Khi đăng nhập thành công
                 localStorage.setItem('user', JSON.stringify(data));
-
                 dispatch(setUser({
                     id: data.id,
                     full_name: data.full_name,
                     card_id: data.card_id,
                     role: data.role
                 }));
-
+                navigate('/');
             } else {
                 toast.error(res.message);
             }
-
         } catch (error) {
-            console.log(error)
-
+            toast.error('Đã xảy ra lỗi trong quá trình đăng nhập');
+            console.error(error);
         }
     };
 
-
-
     return (
-        <div className="screen-center gap-6 h-screen">
-            <h2 className="bg-w text-2xl font-semibold">Đăng nhập vào hệ thống</h2>
-            <Form
-                name="basic"
-                labelCol={{ span: 8 }}
-                wrapperCol={{ span: 16 }}
-                style={{ maxWidth: 600 }}
-                initialValues={{ remember: true }}
-                autoComplete="off"
-                onFinish={handleLogin}
-            >
-                <Form.Item<FieldType>
-                    label="Username"
-                    name="username"
-                    rules={[{ required: true, message: 'Please input your username!' }]}
+        <div className="flex items-center justify-center h-screen bg-gray-100 px-4">
+            <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+                <h2 className="text-2xl font-semibold text-center text-blue-600 mb-6">
+                    Đăng nhập vào hệ thống
+                </h2>
+
+                <Form
+                    name="login-form"
+                    layout="vertical"
+                    onFinish={handleLogin}
+                    autoComplete="off"
                 >
-                    <Input />
-                </Form.Item>
+                    <Form.Item<FieldType>
+                        label="Tên đăng nhập"
+                        name="username"
+                        rules={[{ required: true, message: 'Vui lòng nhập tên đăng nhập!' }]}
+                    >
+                        <Input placeholder="Nhập tên đăng nhập" />
+                    </Form.Item>
 
-                <Form.Item<FieldType>
-                    label="Password"
-                    name="password"
-                    rules={[{ required: true, message: 'Please input your password!' }]}
-                >
-                    <Input.Password />
-                </Form.Item>
+                    <Form.Item<FieldType>
+                        label="Mật khẩu"
+                        name="password"
+                        rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
+                    >
+                        <Input.Password placeholder="Nhập mật khẩu" />
+                    </Form.Item>
 
-                {/* <Form.Item<FieldType> name="remember" valuePropName="checked" label={null}>
-                    <Checkbox>Remember me</Checkbox>
-                </Form.Item> */}
-
-                <Form.Item label={null}>
-                    <Button type="primary" htmlType="submit">
-                        Đăng nhập
-                    </Button>
-                </Form.Item>
-            </Form>
-
+                    <Form.Item>
+                        <Button
+                            type="primary"
+                            htmlType="submit"
+                            className="w-full bg-blue-600 hover:bg-blue-700"
+                        >
+                            Đăng nhập
+                        </Button>
+                    </Form.Item>
+                </Form>
+            </div>
         </div>
-    )
+    );
 }
 
-export default Login
+export default Login;

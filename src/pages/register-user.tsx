@@ -23,7 +23,6 @@ const RegisterUser = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // console.log('Submit:', form);
 
     const res = await createUser(form.full_name, form.role, form.username);
     if (res.success) {
@@ -40,10 +39,10 @@ const RegisterUser = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+    <div className="min-h-screen bg-gray-100 flex justify-center">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-lg bg-white p-8 rounded-lg shadow-md space-y-6"
+        className="w-full max-w-lg bg-white p-8 rounded-lg shadow-md space-y-6 h-fit m-10"
       >
         <h2 className="text-2xl font-bold text-center text-blue-600">Đăng ký tài khoản</h2>
 

@@ -1,12 +1,16 @@
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import type { RootState } from "../store";
 
 function Sidebar() {
     const currentUser = useSelector((state: RootState) => state.user);
+    const location = useLocation();
 
-    const menuItemClass =
-        "flex items-center gap-3 px-6 py-3 hover:bg-blue-600 transition rounded-md";
+    const menuItemClass = (path: string) =>
+        `flex items-center gap-3 px-6 py-3 transition rounded-md ${location.pathname === path
+            ? "bg-blue-700 font-semibold"
+            : "hover:bg-blue-600"
+        }`;
 
     const sectionTitle = (text: string) => (
         <div className="px-6 py-2 mt-4 text-xs uppercase font-bold text-blue-200 tracking-wider">
@@ -19,28 +23,28 @@ function Sidebar() {
             {sectionTitle("Quản trị viên")}
 
             <Link to="/admin/manage-classes">
-                <div className={menuItemClass}>
+                <div className={menuItemClass("/admin/manage-classes")}>
                     <i className="fa-solid fa-chalkboard-teacher w-5 text-white"></i>
                     Quản lý lớp học
                 </div>
             </Link>
 
             <Link to="/admin/manage-subject">
-                <div className={menuItemClass}>
+                <div className={menuItemClass("/admin/manage-subject")}>
                     <i className="fa-solid fa-book-open w-5 text-white"></i>
                     Quản lý môn học
                 </div>
             </Link>
 
             <Link to="/admin/manage-student">
-                <div className={menuItemClass}>
+                <div className={menuItemClass("/admin/manage-student")}>
                     <i className="fa-solid fa-user-graduate w-5 text-white"></i>
                     Quản lý sinh viên
                 </div>
             </Link>
 
             <Link to="/admin/register-user">
-                <div className={menuItemClass}>
+                <div className={menuItemClass("/admin/register-user")}>
                     <i className="fa-solid fa-user-plus w-5 text-white"></i>
                     Tạo tài khoản
                 </div>
@@ -53,7 +57,7 @@ function Sidebar() {
             {sectionTitle("Giảng viên")}
 
             <Link to="/teacher/enter_score">
-                <div className={menuItemClass}>
+                <div className={menuItemClass("/teacher/enter_score")}>
                     <i className="fa-solid fa-pen-to-square w-5 text-white"></i>
                     Nhập điểm
                 </div>
@@ -63,11 +67,11 @@ function Sidebar() {
 
     return (
         <div className="bg-blue-500 text-white w-64 min-h-screen py-4 shadow-lg">
-            <Link to="/admin">
-                <div className="text-2xl font-bold text-center py-6 border-b border-blue-300 uppercase">
-                    Quản lý sinh viên
-                </div>
-            </Link>
+            {/* <Link to="/admin"> */}
+            <div className="text-2xl font-bold text-center py-6 border-b border-blue-300 uppercase">
+                Quản lý sinh viên
+            </div>
+            {/* </Link> */}
 
             <div className="mt-4">
                 {currentUser.role === 1 && roleAdmin()}

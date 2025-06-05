@@ -3,7 +3,7 @@ const { Search } = Input;
 import { getListStudent } from '../../services/userServices';
 import { useEffect, useState } from 'react';
 import { getListClass, postStudentInClass } from '../../services/classServices';
-import { postUpdateGrades } from '../../services/gradesServices';
+import { getGradeHistory, postUpdateGrades } from '../../services/gradesServices';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../store';
 import { toast } from 'react-toastify';
@@ -26,20 +26,24 @@ type Class = {
     status: string;
 };
 
-type FieldType = {
+type Grades = {
     process_score?: string;
     midterm_score?: string;
     final_score?: string;
+    score_avg: string,
+    updated_at: number,
+    updated_by_name:string,
 };
 
 function EnterScore() {
     const currentUser = useSelector((state: RootState) => state.user);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isModalHistory, setIsModalHistory] = useState(false);
     const [listData, setListData] = useState<User[]>([]);
     const [listClass, setListClass] = useState<Class[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
-    const [studentclassID, setStudentclassID] = useState('');
-
+    const [studentclassID, setStudentclassID] = useState(0);
+    const [gradeHistory, setGradeHistory] = useState<Grades>();
 
     const loadData = async () => {
         try {
@@ -85,10 +89,16 @@ function EnterScore() {
             title: 'Nhập điểm',
             // dataIndex: 'card_id',
             // key: 'card_id',
-            render: (_: unknown, record: object) => (
-                <Button type="link" onClick={() => handleOpenModalEnterScore(record)}>
-                    <i className="fa-solid fa-plus"></i>
-                </Button>
+            render: (_: unknown, record: User) => (
+                <>
+                    <Button type="link" onClick={() => handleOpenModalEnterScore(record)}>
+                        <i className="fa-solid fa-plus"></i>
+
+                    </Button>
+                    <Button type="link" onClick={() => handleOpenModalHistory(record)}>
+                        <i className="fa-solid fa-clock"></i>
+                    </Button>
+                </>
             ),
         },
 
@@ -110,11 +120,10 @@ function EnterScore() {
             card_id: item.card_id,
         }));
 
-    const handleSelectedClass = async (value) => {
+    const handleSelectedClass = async (value: number) => {
         try {
             const res = await postStudentInClass(value)
-            console.log(res)
-            const data = res.data.map((item, index) => ({
+            const data = res.data.map((item: User, index: number) => ({
                 key: item.id,
                 id: index + 1,
                 full_name: item.full_name,
@@ -129,15 +138,27 @@ function EnterScore() {
 
     }
 
-    const handleOpenModalEnterScore = (item) => {
+    const handleOpenModalEnterScore = (item: User) => {
         setIsModalOpen(true)
         setStudentclassID(item.id)
     }
 
-    const handleSubmitScore = async (value) => {
-        // student_class_id: number, process_score: number, midterm_score: number, final_score: number, updated_by: number)
+    const handleOpenModalHistory = async (item: User) => {
+        setIsModalHistory(true);
+        setStudentclassID(item.id);
 
+        try {
+            const history = await getGradeHistory(item.id);
+            setGradeHistory(history?.[0]);
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+
+    const handleSubmitScore = async (value: Grades) => {
         const res = await postUpdateGrades(studentclassID, value.process_score, value.midterm_score, value.final_score, currentUser.id);
+
         if (res.success) {
             toast.success(res.message)
         } else {
@@ -191,7 +212,7 @@ function EnterScore() {
                         autoComplete="off"
                     >
 
-                        <Form.Item<FieldType>
+                        <Form.Item<Grades>
                             label="Điểm quá trình"
                             name="process_score"
 
@@ -199,7 +220,7 @@ function EnterScore() {
                             <Input />
                         </Form.Item>
 
-                        <Form.Item<FieldType>
+                        <Form.Item<Grades>
                             label="Điểm giữa kỳ"
                             name="midterm_score"
 
@@ -207,7 +228,7 @@ function EnterScore() {
                             <Input />
                         </Form.Item>
 
-                        <Form.Item<FieldType>
+                        <Form.Item<Grades>
                             label="Điểm cuối kỳ"
                             name="final_score"
 
@@ -223,6 +244,30 @@ function EnterScore() {
                         </Form.Item>
                     </Form>
                 </Modal>
+
+
+
+                <Modal
+                    title="Lịch sử nhập điểm"
+                    open={isModalHistory}
+                    onCancel={() => setIsModalHistory(false)}
+                    footer={null}
+                >
+                    {gradeHistory ? (
+                        <div className="space-y-2">
+                            <p><strong>Điểm quá trình:</strong> {gradeHistory.process_score}</p>
+                            <p><strong>Điểm giữa kỳ:</strong> {gradeHistory.midterm_score}</p>
+                            <p><strong>Điểm cuối kỳ:</strong> {gradeHistory.final_score}</p>
+                            <p><strong>Điểm trung bình:</strong> {gradeHistory.score_avg}</p>
+                            <p><strong>Người cập nhật:</strong> {gradeHistory.updated_by_name}</p>
+                            <p><strong>Ngày cập nhật:</strong> {new Date(gradeHistory.updated_at).toLocaleString()}</p>
+                        </div>
+                    ) : (
+                        <p>Chưa có dữ liệu điểm.</p>
+                    )}
+                </Modal>
+
+
             </div>
         </>
     )
