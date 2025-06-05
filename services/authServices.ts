@@ -1,4 +1,3 @@
-// import rootApi from './baseServices';
 const rootApi = import.meta.env.VITE_API_ROOT;
 
 
