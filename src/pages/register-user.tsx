@@ -74,34 +74,7 @@ const RegisterUser = () => {
           </div>
         }
 
-
         {/* <div>
-          <label className="block mb-1 font-medium">Email</label>
-          <input
-            type="email"
-            name="email"
-            value={form.email}
-            onChange={handleChange}
-            required
-            className="w-full border border-gray-300 rounded px-4 py-2"
-            placeholder="example@email.com"
-          />
-        </div> */}
-
-        {/* <div>
-          <label className="block mb-1 font-medium">Mã số</label>
-          <input
-            type="text"
-            name="card_id"
-            value={form.card_id}
-            onChange={handleChange}
-            required
-            className="w-full border border-gray-300 rounded px-4 py-2"
-            placeholder="VD: GV001 hoặc SV001"
-          />
-        </div> */}
-
-        <div>
           <label className="block mb-1 font-medium">Vai trò</label>
           <select
             name="role"
@@ -112,6 +85,28 @@ const RegisterUser = () => {
             <option value="3">Sinh viên</option>
             <option value="2">Giảng viên</option>
           </select>
+        </div> */}
+
+        <div>
+          <label className="block mb-1 font-medium">Vai trò</label>
+          <div className="relative">
+            <select
+              name="role"
+              value={form.role}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded px-4 py-2 pr-8 appearance-none focus:outline-none leading-tight"
+            >
+              <option value="3">Sinh viên</option>
+              <option value="2">Giảng viên</option>
+            </select>
+
+            {/* Optional: Dropdown icon */}
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+              <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
+                <path d="M5.516 7.548l4.484 4.484 4.484-4.484L15.93 9l-5.93 5.93L4.07 9z" />
+              </svg>
+            </div>
+          </div>
         </div>
 
         <button
