@@ -1,4 +1,4 @@
-import rootApi from './baseServices';
+const rootApi = import.meta.env.VITE_API_ROOT;
 
 export async function postUpdateGrades(student_class_id: number, process_score: string, midterm_score: string, final_score: string, updated_by: number) {
     const response = await fetch(`${rootApi}/update_grades`, {

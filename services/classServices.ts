@@ -1,4 +1,4 @@
-import rootApi from './baseServices';
+const rootApi = import.meta.env.VITE_API_ROOT;
 
 async function getListClass() {
     const response = await fetch(`${rootApi}/classes`, {

@@ -1,5 +1,5 @@
-import rootApi from './baseServices';
-
+// import rootApi from './baseServices';
+const rootApi = import.meta.env.VITE_API_ROOT;
 
 
 export async function loginAPI(username: string, password: string) {
