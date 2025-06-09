@@ -1,6 +1,6 @@
 import { Input, Table } from 'antd';
 const { Search } = Input;
-import { getListStudent } from '../../services/userServices';
+import { getListStudent } from '../../../services/userServices';
 import { useEffect, useState } from 'react';
 
 type User = {

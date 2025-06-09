@@ -1,9 +1,9 @@
 import { Button, Form, Input } from 'antd';
-import { loginAPI } from '../../services/authServices';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { setUser } from '../../features/authentication/authSlice';
 import { toast } from 'react-toastify';
+import { loginAPI } from '../../../services/authServices';
+import { setUser } from '../../../features/authentication/authSlice';
 
 type FieldType = {
     username?: string;

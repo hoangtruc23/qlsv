@@ -1,6 +1,6 @@
 const rootApi = import.meta.env.VITE_API_ROOT;
 
-async function getListClass() {
+export async function getListClass() {
     const response = await fetch(`${rootApi}/classes`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
@@ -11,7 +11,7 @@ async function getListClass() {
     return response.json();
 }
 
-async function assignClass(subject_id: number, teacher_id: number, semester: number) {
+export async function assignClass(subject_id: number, teacher_id: number, semester: number) {
     const response = await fetch(`${rootApi}/assign_class`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -23,7 +23,7 @@ async function assignClass(subject_id: number, teacher_id: number, semester: num
     return response.json();
 }
 
-async function postNewClasses(subject_id: string, teacher_id: string, semester: string, max_students: string) {
+export async function postNewClasses(subject_id: string, teacher_id: string, semester: string, max_students: string) {
     const response = await fetch(`${rootApi}/add_class`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -36,7 +36,7 @@ async function postNewClasses(subject_id: string, teacher_id: string, semester: 
 }
 
 
-async function postAssignStudentToClass(class_id: number, student_id: number) {
+export async function postAssignStudentToClass(class_id: number, student_id: number) {
     const response = await fetch(`${rootApi}/assign_student_class`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -48,8 +48,20 @@ async function postAssignStudentToClass(class_id: number, student_id: number) {
     return response.json();
 }
 
+export async function postUpdateClassStatus(class_id: number, status: string) {
+    const response = await fetch(`${rootApi}/updateClassStatus`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ class_id, status }),
+    });
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+    return response.json();
+}
 
-async function postStudentInClass(class_id: number) {
+
+export async function postStudentInClass(class_id: number) {
     const response = await fetch(`${rootApi}/student_class`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -61,8 +73,13 @@ async function postStudentInClass(class_id: number) {
     return response.json();
 }
 
-
-
-
-
-export { getListClass, assignClass, postNewClasses, postAssignStudentToClass,postStudentInClass }
+export async function getStudentsByClass(class_id: number) {
+    const response = await fetch(`${rootApi}/classes/${class_id}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+    });
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+    return response.json();
+}

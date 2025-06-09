@@ -1,9 +1,11 @@
-import { Input, Table, Button, Modal, Select } from 'antd';
+import { Input, Table, Button, Modal, Select, List, Avatar, Dropdown, Space, type MenuProps } from 'antd';
 import { useEffect, useState } from 'react';
-import { getListSubject } from '../../services/subjectServices';
-import { getListClass, postAssignStudentToClass, postNewClasses } from '../../services/classServices';
 import { toast } from 'react-toastify';
-import { getListStudent, getListTeacher } from '../../services/userServices';
+import { DownOutlined, UserOutlined } from '@ant-design/icons';
+import { getListStudent, getListTeacher } from '../../../services/userServices';
+import { getListSubject } from '../../../services/subjectServices';
+import { getListClass, getStudentsByClass, postAssignStudentToClass, postNewClasses, postUpdateClassStatus } from '../../../services/classServices';
+
 const { Search } = Input;
 
 
@@ -37,6 +39,7 @@ type User = {
 function ManageClasses() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isModalAssign, setIsModalAssign] = useState(false);
+    const [isViewStudentOpen, setIsViewStudentOpen] = useState(false);
     const [listSubject, setListSubject] = useState<Subject[]>([]);
     const [listClass, setListClass] = useState<Class[]>([]);
     const [listTeacher, setListTeacher] = useState<User[]>([]);
@@ -48,6 +51,8 @@ function ManageClasses() {
     const [maxStudent, setMaxStudent] = useState('');
     const [currentClass, setCurrentClass] = useState(0);
     const [searchTerm, setSearchTerm] = useState('');
+    const [listStudentsInClass, setListStudentsInClass] = useState<User[]>([]);
+    const statusOptions = ['active', 'closed'];
 
     const columns = [
         {
@@ -75,23 +80,72 @@ function ManageClasses() {
             dataIndex: 'current_students',
             key: 'current_students',
         },
+        // {
+        //     title: 'Trạng thái',
+        //     dataIndex: 'status',
+        //     key: 'status',
+        // },
         {
             title: 'Trạng thái',
-            dataIndex: 'status',
             key: 'status',
+            render: (_: unknown, record: Class) => renderStatusDropdown(record),
         },
         {
             title: 'Thao tác',
             key: 'action',
             render: (_: unknown, record: Class) => (
-                <Button type="link" onClick={() => handleAssignStudent(record)}>
-                    <i className="fa-solid fa-plus"></i>
-                </Button>
+                <>
+                    <Button type="link" onClick={() => handleAssignStudent(record)}>
+                        <i className="fa-solid fa-plus"></i>
+                    </Button>
+                    <Button type="link" onClick={() => handleViewStudents(record)}>
+                        <i className="fa-solid fa-eye"></i>
+                    </Button>
+                </>
             ),
         }
-
     ];
 
+    const renderStatusDropdown = (record: Class) => {
+        const items: MenuProps['items'] = statusOptions.map(status => ({
+            key: status,
+            label: (
+                <span onClick={() => handleChangeStatus(record.class_id, status)}>
+                    {status === 'active' && 'Lớp mở'}
+                    {status === 'closed' && 'Lớp đóng'}
+                </span>
+            )
+        }));
+
+        return (
+            <Dropdown menu={{ items }} trigger={['click']}>
+                <a onClick={(e) => e.preventDefault()}>
+                    <Space>
+                        {record.status === 'active' ? 'Lớp mở' : 'Lớp đóng'}
+                        <DownOutlined />
+                    </Space>
+                </a>
+            </Dropdown>
+        );
+    };
+
+    const handleChangeStatus = async (classId: number, newStatus: string) => {
+        const res = await postUpdateClassStatus(classId, newStatus);
+        if (res.success) {
+            toast.success("Cập nhật trạng thái thành công");
+            loadGetListClass();
+        } else {
+            toast.error("Cập nhật trạng thái thất bại");
+        }
+    };
+
+    const handleViewStudents = async (item: Class) => {
+        setIsViewStudentOpen(true)
+        const res = await getStudentsByClass(item.class_id);
+        if (res.success) {
+            setListStudentsInClass(res.data)
+        }
+    }
     // const dataSource = listClass.map((item, key) => ({
     //     stt: key + 1,
     //     class_id: item.class_id,
@@ -275,6 +329,7 @@ function ManageClasses() {
                         <p>Học kỳ</p>
                         <input
                             type="number"
+                            min={1}
                             className="border rounded px-2 py-1 w-full border-[#d9d9d9]"
                             placeholder="Nhập học kỳ"
                             value={semester}
@@ -288,6 +343,7 @@ function ManageClasses() {
                         <p>Tối đa sinh viên</p>
                         <input
                             type="number"
+                            min={1}
                             className="border rounded px-2 py-1 w-full border-[#d9d9d9]"
                             value={maxStudent}
                             onChange={(e) => setMaxStudent(e.target.value)}
@@ -317,6 +373,28 @@ function ManageClasses() {
                         ))}
                     </Select>
                 </div>
+            </Modal>
+
+
+            <Modal
+                title="Danh sách sinh viên trong lớp"
+                open={isViewStudentOpen}
+                onCancel={() => setIsViewStudentOpen(false)}
+                footer={null}
+            >
+                <List
+                    itemLayout="horizontal"
+                    dataSource={listStudentsInClass}
+                    renderItem={(student) => (
+                        <List.Item>
+                            <List.Item.Meta
+                                avatar={<Avatar icon={<UserOutlined />} />}
+                                title={student.full_name}
+                                description={student.card_id}
+                            />
+                        </List.Item>
+                    )}
+                />
             </Modal>
         </div >
     )

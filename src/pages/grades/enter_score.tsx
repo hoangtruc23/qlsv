@@ -1,12 +1,14 @@
 import { Button, Form, Input, Modal, Select, Table } from 'antd';
 const { Search } = Input;
-import { getListStudent } from '../../services/userServices';
 import { useEffect, useState } from 'react';
-import { getListClass, postStudentInClass } from '../../services/classServices';
-import { getGradeHistory, postUpdateGrades } from '../../services/gradesServices';
 import { useSelector } from 'react-redux';
-import type { RootState } from '../store';
+// import type { RootState } from '../store';
 import { toast } from 'react-toastify';
+import { getListStudent } from '../../../services/userServices';
+import type { RootState } from '../../store';
+import { getListClass, postStudentInClass } from '../../../services/classServices';
+import { getGradeHistory, postUpdateGrades } from '../../../services/gradesServices';
+
 
 type User = {
     id: number;
@@ -32,7 +34,7 @@ type Grades = {
     final_score?: string;
     score_avg: string,
     updated_at: number,
-    updated_by_name:string,
+    updated_by_name: string,
 };
 
 function EnterScore() {
@@ -157,7 +159,7 @@ function EnterScore() {
 
 
     const handleSubmitScore = async (value: Grades) => {
-        const res = await postUpdateGrades(studentclassID, value.process_score, value.midterm_score, value.final_score, currentUser.id);
+        const res = await postUpdateGrades(studentclassID, value.process_score || '', value.midterm_score || '', value.final_score || '', currentUser.id);
 
         if (res.success) {
             toast.success(res.message)

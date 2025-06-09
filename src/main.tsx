@@ -7,18 +7,18 @@ import {
 
 import './index.css'
 import App from './App.tsx'
-import Login from './pages/login.tsx';
-import AdminPage from './pages/admin-page.tsx';
-import ManageSubject from './pages/manage-subject.tsx';
-import ManageStudent from './pages/manage-students.tsx';
-import EnterScore from './pages/enter_score.tsx';
+import AdminPage from './pages/dashboard/admin/admin-page.tsx';
+import ManageSubject from './pages/subject/manage-subject.tsx';
+import ManageStudent from './pages/student/manage-students.tsx';
 import { store } from './store.ts';
 import { Provider } from 'react-redux';
 import { Bounce, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import ManageClasses from './pages/manage-classes.tsx';
-import RegisterUser from './pages/register-user.tsx';
-import ProfilePage from './pages/profile.tsx';
+import ManageClasses from './pages/classes/manage-classes.tsx';
+import RegisterUser from './pages/auth/register-user.tsx';
+import ProfilePage from './pages/auth/profile.tsx';
+import Login from './pages/auth/login.tsx';
+import EnterScore from './pages/grades/enter_score.tsx';
 
 const router = createBrowserRouter([
   {
