@@ -1,8 +1,26 @@
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
+import { Modal } from "antd";
+import { useState } from "react";
+import { changePassword } from "../../../services/authServices";
+import { toast } from "react-toastify";
 
 const ProfilePage = () => {
   const currentUser = useSelector((state: RootState) => state.user);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [passwordOld, setPasswordOld] = useState("");
+  const [passwordNew, setPasswordNew] = useState("");
+
+  const handleSubmitChange = async () => {
+    const res = await changePassword(currentUser.id, passwordOld, passwordNew)
+    
+    if (res.success) {
+      toast.success(res.message)
+      setIsModalOpen(false)
+    } else {
+      toast.error(res.message)
+    }
+  }
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-5xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
@@ -16,7 +34,42 @@ const ProfilePage = () => {
             />
             <h2 className="mt-4 text-xl font-semibold">{currentUser.full_name}</h2>
             <p className="text-sm text-gray-600">{currentUser.role == 3 ? 'Sinh viên' : (currentUser.role == 2 ? 'Giảng viên' : "Admin")}</p>
+
+            <button className="bg-blue-500 hover:bg-blue-600 text-white font-medium p-1 rounded" onClick={() => setIsModalOpen(true)}>
+              Đổi mật khẩu
+            </button>
           </div>
+
+          <Modal
+            title="Đổi mật khẩu"
+            closable={{ 'aria-label': 'Custom Close Button' }}
+            open={isModalOpen}
+            onOk={handleSubmitChange}
+            onCancel={() => setIsModalOpen(false)}
+          >
+            <div>
+              <label className="block mb-1 font-medium">Mật khẩu hiện tại</label>
+              <input
+                type="password"
+                name="password_old"
+                onChange={(e) => setPasswordOld(e.target.value)}
+                required
+                className="w-full border border-gray-300 rounded px-4 py-2"
+                placeholder="Nhập mật khẩu hiện tại"
+              />
+            </div>
+            <div className="my-2">
+              <label className="block mb-1 font-medium">Mật khẩu mới</label>
+              <input
+                type="password"
+                name="password_new"
+                onChange={(e) => setPasswordNew(e.target.value)}
+                required
+                className="w-full border border-gray-300 rounded px-4 py-2"
+                placeholder="Nhập mật khẩu mới"
+              />
+            </div>
+          </Modal>
 
           {/* Right: Detailed Info */}
           <div className="md:w-2/3 p-6">

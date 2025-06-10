@@ -25,4 +25,18 @@ export async function createUser(full_name: string, role: number, username: stri
     return response.json();
 }
 
+export async function changePassword(user_id: number, old_password: string, new_password: string) {
+    const response = await fetch(`${rootApi}/change_password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id, old_password, new_password }),
+    });
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+    return response.json();
+}
+
+
+
 
