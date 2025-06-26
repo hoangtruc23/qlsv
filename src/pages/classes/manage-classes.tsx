@@ -4,7 +4,7 @@ import { toast } from 'react-toastify';
 import { DownOutlined, UserOutlined } from '@ant-design/icons';
 import { getListStudent, getListTeacher } from '../../../services/userServices';
 import { getListSubject } from '../../../services/subjectServices';
-import { getListClass, getStudentsByClass, postAssignStudentToClass, postNewClasses, postUpdateClassStatus } from '../../../services/classServices';
+import { getListClass, getStudentsByClass, postAssignStudentToClass, postNewClasses, postUpdateClassStatus, postUpdateClassTeacher } from '../../../services/classServices';
 
 const { Search } = Input;
 
@@ -40,11 +40,12 @@ function ManageClasses() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isModalAssign, setIsModalAssign] = useState(false);
     const [isViewStudentOpen, setIsViewStudentOpen] = useState(false);
+    const [isModalUpdateTeacher, setIsModalUpdateTeacher] = useState(false);
     const [listSubject, setListSubject] = useState<Subject[]>([]);
     const [listClass, setListClass] = useState<Class[]>([]);
     const [listTeacher, setListTeacher] = useState<User[]>([]);
     const [listStudent, setListStudent] = useState<User[]>([]);
-    const [selectedStudentIds, setSelectedStudentIds] = useState([]);
+    // const [selectedStudentIds, setSelectedStudentIds] = useState<number[]>([]);
     const [selectedSubject, setSelectedSubject] = useState('');
     const [selectedTeacher, setSelectedTeacher] = useState('');
     const [semester, setSemester] = useState('');
@@ -53,6 +54,7 @@ function ManageClasses() {
     const [searchTerm, setSearchTerm] = useState('');
     const [listStudentsInClass, setListStudentsInClass] = useState<User[]>([]);
     const statusOptions = ['active', 'closed'];
+    const [searchKeyword, setSearchKeyword] = useState<string>('');
 
     const columns = [
         {
@@ -95,7 +97,10 @@ function ManageClasses() {
             key: 'action',
             render: (_: unknown, record: Class) => (
                 <>
-                    <Button type="link" onClick={() => handleAssignStudent(record)}>
+                    <Button type="link" onClick={() => handleAssignStudent(record, 'updateTeacher')}>
+                        <i className="fa-solid fa-pencil"></i>
+                    </Button>
+                    <Button type="link" onClick={() => handleAssignStudent(record, 'assignStudents')}>
                         <i className="fa-solid fa-plus"></i>
                     </Button>
                     <Button type="link" onClick={() => handleViewStudents(record)}>
@@ -139,6 +144,13 @@ function ManageClasses() {
         }
     };
 
+    const loadListStudent = async (class_id: number) => {
+        const res = await getStudentsByClass(class_id);
+        if (res.success) {
+            setListStudentsInClass(res.data)
+        }
+    }
+
     const handleViewStudents = async (item: Class) => {
         setIsViewStudentOpen(true)
         const res = await getStudentsByClass(item.class_id);
@@ -146,18 +158,6 @@ function ManageClasses() {
             setListStudentsInClass(res.data)
         }
     }
-    // const dataSource = listClass.map((item, key) => ({
-    //     stt: key + 1,
-    //     class_id: item.class_id,
-    //     class_name: item.class_name,
-    //     subject_id: item.subject_id,
-    //     subject_name: item.subject_name,
-    //     teacher_name: item.teacher_name,
-    //     teacher_id: item.teacher_id,
-    //     max_students: item.max_students,
-    //     current_students: item.current_students,
-    //     status: item.status
-    // }));
 
     const dataSource = listClass
         .filter(item =>
@@ -234,9 +234,16 @@ function ManageClasses() {
 
 
 
-
-    const handleAssignStudent = (item: Class) => {
-        setIsModalAssign(true)
+    const handleAssignStudent = (item: Class, type: string) => {
+        loadListStudent(item.class_id);
+        switch (type) {
+            case 'assignStudents':
+                setIsModalAssign(true)
+                break;
+            case 'updateTeacher':
+                setIsModalUpdateTeacher(true)
+                break;
+        }
         setCurrentClass(item.class_id)
     }
 
@@ -244,23 +251,30 @@ function ManageClasses() {
     const handleSubmitAssign = async () => {
         setIsModalAssign(false);
         try {
-            // selectedStudentIds.map(async (item) => {
-            //     const res = await postAssignStudentToClass(currentClass, item)
-            //     console.log(res)
-            // })
+            const res = await postAssignStudentToClass(currentClass, listStudentsInClass.map(item => item.id));
+            if (res.success) {
+                toast.success("Cập nhật thành công");
+            }
+            loadGetListClass();
+        } catch {
+            toast.error("Cập nhật thất bại");
+        }
+    }
 
-            await Promise.all(
-                selectedStudentIds.map((item) =>
-                    postAssignStudentToClass(currentClass, item)
-                )
-            );
-
+    const handleSubmitUpdateTeacher = async () => {
+        setIsModalUpdateTeacher(false)
+        try {
+            await postUpdateClassTeacher(selectedTeacher, currentClass);
             toast.success("Cập nhật thành công");
             loadGetListClass();
         } catch {
             toast.error("Cập nhật thất bại");
         }
     }
+
+    const filteredStudents = listStudent.filter((student) =>
+        student.full_name.toLowerCase().includes(searchKeyword.toLowerCase())
+    );
 
     return (
         <div className="p-10">
@@ -352,23 +366,71 @@ function ManageClasses() {
                 </div>
             </Modal>
 
-
             <Modal
                 title="Thêm sinh viên vào lớp"
-                closable={{ 'aria-label': 'Custom Close Button' }}
                 open={isModalAssign}
                 onCancel={() => setIsModalAssign(false)}
-                onOk={() => handleSubmitAssign()}
+                onOk={handleSubmitAssign}
+                width={600}
+            >
+                <p className="mb-2 font-semibold">Chọn sinh viên:</p>
+
+                <input
+                    type="text"
+                    placeholder="Tìm theo tên sinh viên..."
+                    className="w-full p-2 border rounded mb-3"
+                    value={searchKeyword}
+                    onChange={(e) => setSearchKeyword(e.target.value)}
+                />
+
+                <div className="max-h-80 overflow-y-auto border rounded p-2 space-y-2">
+                    {filteredStudents.map((student) => (
+                        <label
+                            key={student.id}
+                            className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 p-1 rounded"
+                        >
+                            <input
+                                type="checkbox"
+                                checked={listStudentsInClass.some((u) => u.id === student.id)}
+                                onChange={(e) => {
+                                    if (e.target.checked) {
+                                        setListStudentsInClass([...listStudentsInClass, student]); // thêm user
+                                    } else {
+                                        setListStudentsInClass(
+                                            listStudentsInClass.filter((u) => u.id !== student.id) // xóa user
+                                        );
+                                    }
+                                }}
+                            />
+
+                            <span>{student.full_name}</span>
+                        </label>
+                    ))}
+
+                    {filteredStudents.length === 0 && (
+                        <p className="text-center text-gray-500">Không tìm thấy sinh viên nào</p>
+                    )}
+                </div>
+            </Modal >
+
+            <Modal
+                title="Đổi giáo viên lớp"
+                closable={{ 'aria-label': 'Custom Close Button' }}
+                open={isModalUpdateTeacher}
+                onCancel={() => setIsModalUpdateTeacher(false)}
+                onOk={() => handleSubmitUpdateTeacher()}
             >
                 <div className="flex flex-col gap-2 justify-center items-center">
-                    <p>Chọn sinh viên</p>
-                    <Select mode="multiple" placeholder="Chọn sinh viên" className="w-full"
-                        value={selectedStudentIds}
-                        onChange={(value) => setSelectedStudentIds(value)}
+                    <p>Chọn giáo viên</p>
+                    <Select
+                        placeholder="Chọn giáo viên"
+                        className="w-full"
+                        value={selectedTeacher}
+                        onChange={(value) => setSelectedTeacher(value)}
                     >
-                        {listStudent.map((teacher) => (
-                            <Select.Option key={teacher.id} value={teacher.id} >
-                                {teacher.full_name}
+                        {listTeacher.map((item) => (
+                            <Select.Option key={item.id} value={item.id}>
+                                {item.full_name}
                             </Select.Option>
                         ))}
                     </Select>

@@ -1,4 +1,4 @@
-import { Input, Table, Button, Modal, Form } from 'antd';
+import { Input, Table, Button, Modal, Form, InputNumber } from 'antd';
 import { useEffect, useState } from 'react';
 import { getListSubject, addSubject, removeSubject, updateSubject } from '../../../services/subjectServices';
 import { toast } from 'react-toastify';
@@ -77,24 +77,21 @@ function ManageSubject() {
     ];
 
     const handleSubmitAdd = async (values: Subject) => {
+        if (!Number.isInteger(values.credit) || values.credit <= 0) {
+            toast.error("Số tín chỉ phải là số nguyên dương!");
+            return;
+        }
+
         try {
             const res = await addSubject(values.subject_name, values.credit);
             if (res.success) {
                 toast.success(res.message)
+                loadGetListSubject();
             }
         } catch (e) {
             console.log(e)
         }
     }
-
-    // const handleSelectedTeacher = async (teacher_id: number) => {
-    //     const res = await assignTeacher(teacher_id, subjectID);
-    //     if (res.success) {
-    //         setIsModalAssign(false);
-    //         loadGetListSubject();
-    //         toast.success(res.message);
-    //     }
-    // };
 
     const handleModalRemove = (item: Subject) => {
         setIsModalRemove(true);
@@ -175,7 +172,7 @@ function ManageSubject() {
                 >
                     <Form.Item
                         label="Tên môn học"
-                        name="name"
+                        name="subject_name"
                         rules={[{ required: true, message: 'Hãy nhập tên môn học!' }]}
                     >
                         <Input />
@@ -186,7 +183,15 @@ function ManageSubject() {
                         name="credit"
                         rules={[{ required: true, message: 'Hãy nhập số tín chỉ!' }]}
                     >
-                        <Input />
+                        <InputNumber
+                            min={1}
+                            step={1}
+                            onKeyDown={(e) => {
+                                if (e.key === '.' || e.key === 'e' || e.key === '-' || e.key === '+') {
+                                    e.preventDefault();
+                                }
+                            }}
+                        />
                     </Form.Item>
 
                     <Form.Item label={null} className="text-right">

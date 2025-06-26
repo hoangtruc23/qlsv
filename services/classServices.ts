@@ -36,11 +36,11 @@ export async function postNewClasses(subject_id: string, teacher_id: string, sem
 }
 
 
-export async function postAssignStudentToClass(class_id: number, student_id: number) {
+export async function postAssignStudentToClass(class_id: number, student_ids: number[]) {
     const response = await fetch(`${rootApi}/assign_student_class`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ class_id, student_id }),
+        body: JSON.stringify({ class_id, student_ids }),
     });
     if (!response.ok) {
         throw new Error('Network response was not ok');
@@ -53,6 +53,18 @@ export async function postUpdateClassStatus(class_id: number, status: string) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ class_id, status }),
+    });
+    if (!response.ok) {
+        throw new Error('Network response was not ok');
+    }
+    return response.json();
+}
+
+export async function postUpdateClassTeacher(teacher_id: string, class_id: number) {
+    const response = await fetch(`${rootApi}/updateClassTeacher`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ teacher_id, class_id }),
     });
     if (!response.ok) {
         throw new Error('Network response was not ok');
